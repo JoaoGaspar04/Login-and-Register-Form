@@ -1,29 +1,29 @@
 <?php
 // Conexão com o banco de dados
-$servername = "sql105.byetcluster.com"; // servidor de banco de dados
-$username = "if0_37357799";
-$password = "loHzX1FqxhMLOn";
-$dbname = "if0_37357799_ccyber";
-$port = 3306;
+$servername = ""; // servidor de banco de dados
+$username = ""; //nome do utilizador
+$password = ""; // password do utiliador
+$dbname = ""; //nome da base de dados 
+$port = 3306; // porta padrão
 
-$conn = new mysqli($servername, $username, $password, $dbname, $port);
+$conn = new mysqli($servername, $username, $password, $dbname, $port); //obtem os dados 
 
-// Verifica a conexão
+// Verifica como está conexão
 if ($conn->connect_error) {
     die("Conexão falhou: " . $conn->connect_error);
 }
 
-$registrationSuccess = false; // Para controlar se o registro foi bem-sucedido
-$loginMessage = ''; // Para controlar mensagens de login
-$userRole = ''; // Para armazenar o papel do usuário
-$showLoginError = false; // Para controlar se deve mostrar erro de login
+$registrationSuccess = false; // Para  o registro foi bem-sucedido
+$loginMessage = ''; // Para a mensagens de login
+$userRole = ''; // Para guardar o papel do utilizador
+$showLoginError = false; // Controlar se deve mostrar erro de login
 
 // Processa o registro
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
-    $username = trim($_POST['username']);
-    $password = trim($_POST['password']); // Captura a senha como texto simples
+    $username = trim($_POST['username']); // Guarda o nome do Utilizador
+    $password = trim($_POST['password']); // Guarda a Password
 
-    // Verifica se o nome de usuário já existe
+    // Verifica se o nome do utilizador já existe na base de dados
     $stmt = $conn->prepare("SELECT COUNT(*) FROM Users WHERE Username = ?");
     $stmt->bind_param("s", $username);
     $stmt->execute();
@@ -32,21 +32,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
     $stmt->close();
 
     if ($count > 0) {
-        echo "<p>Este nome de Utilizador já está registrado.</p>";
+        echo "<p>Este nome de Utilizador já se encontra registrado.</p>"; // Informa ao Utilizador 
     } else {
-        // Prepara e vincula para inserir novo usuário
+        // Armazena os dados do Novo Utilizador 
         $stmt = $conn->prepare("INSERT INTO Users (Username, Password, Estado, Cargo) VALUES (?, ?, 'Ativo', 'Utilizador')");
         if ($stmt) {
-            $stmt->bind_param("ss", $username, $password); // Insere a senha como texto simples
+            $stmt->bind_param("ss", $username, $password); // Guarda a senha 
 
-            // Executa a consulta
+            // Faz uma consulta
             if ($stmt->execute()) {
-                $registrationSuccess = true; // Atualiza a variável para mostrar o popup
+                $registrationSuccess = true; // Atualiza a variável para  o popup
             } else {
                 echo "<p>Erro ao registrar: " . $stmt->error . "</p>";
             }
 
-            // Fecha a declaração
+            // Fecha O popup
             $stmt->close();
         } else {
             echo "<p>Erro ao preparar a consulta: " . $conn->error . "</p>";
@@ -54,12 +54,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['register'])) {
     }
 }
 
-// Processa o login
+// Carrega o login
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $login_username = trim($_POST['login_username']);
     $login_password = trim($_POST['login_password']); // Captura a senha como texto simples
 
-    // Verifica as credenciais do usuário
+    // Verifica as credenciais do Utilizador e qual o Cargo
     $stmt = $conn->prepare("SELECT Password, Cargo FROM Users WHERE Username = ?");
     $stmt->bind_param("s", $login_username);
     $stmt->execute();
@@ -67,10 +67,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     $stmt->fetch();
     $stmt->close();
 
-    if ($storedPassword === $login_password) { // Compara a senha armazenada com a senha fornecida
-        $loginMessage = "Bem-vindo, $login_username!"; // Mensagem de boas-vindas
+    if ($storedPassword === $login_password) { // Compara as senhas 
+        $loginMessage = "Bem-vindo, $login_username!"; // Mostra ao Utilizador uma Mensagem de boas-vindas
     } else {
-        $showLoginError = true; // Mostra erro de login
+        $showLoginError = true; // Se existir um erro no login mostra aqui 
     }
 }
 
@@ -154,7 +154,7 @@ $conn->close();
             background-color: #58c2bc;
         }
 
-        /* Estilos do popup */
+        /* Estilo do popup */
         .popup {
             display: none;
             position: fixed;
@@ -220,7 +220,7 @@ $conn->close();
         </div>
     </div>
 
-    <!-- Popup de sucesso no registro -->
+    <!-- Popup de registro com sucesso-->
     <?php if ($registrationSuccess): ?>
         <div class="overlay" id="overlay"></div>
         <div class="popup" id="popup">
@@ -230,7 +230,7 @@ $conn->close();
         </div>
     <?php endif; ?>
 
-    <!-- Popups de boas-vindas -->
+    <!-- Popups de boas-vindas  considerando o Cargo-->
     <?php if (!empty($loginMessage)): ?>
         <div class="overlay" id="overlay"></div>
         <div class="popup" id="popup">
